@@ -1,5 +1,6 @@
 // EnergyMonitor.tsx
-import React from "react";
+import React,{useEffect, useState} from "react";
+import axios from 'axios'
 import "./EnergyMonitor.css";
 
 interface EnergyMonitorProps {
@@ -8,6 +9,32 @@ interface EnergyMonitorProps {
 }
 
 const EnergyMonitor: React.FC<EnergyMonitorProps> = ({ percentage,size }) => {
+
+  const [batteryStatus, setBatteryStatus] = useState("")
+
+
+
+  useEffect(() => {
+    const fetchDataBattery = async ()=>{
+      try {
+        const url = import.meta.env.VITE_APP_API_URL
+        const response = await axios.get(`${url}//devices/battery?deviceId=19&setType=EnergyAndPowerBattery&period=Recent`)
+        const data = response.data.set
+        const batteryCharge = data.map(objeto => objeto.batteryStateOfCharge)
+        setBatteryStatus(batteryCharge)
+        
+        
+      } catch (error) {
+        console.log(error);
+        
+        
+      }
+    }
+    fetchDataBattery()
+  }, [])
+
+  
+
   const radius = size / 2 - 5; // El radio del círculo
   const strokeWidth = 10; // El ancho de la línea de progreso
 
@@ -15,7 +42,7 @@ const EnergyMonitor: React.FC<EnergyMonitorProps> = ({ percentage,size }) => {
   const circumference = 2 * Math.PI * radius;
 
   // Calcula la longitud de la línea de progreso según el porcentaje proporcionado
-  const progress = (percentage / 100) * circumference;
+  const progress = (batteryStatus[0] / 100) * circumference;
 
   return (
     <div className="w-72 h-72 gap-5 bg-black/20 rounded-lg flex flex-col items-center justify-center">
@@ -45,7 +72,7 @@ const EnergyMonitor: React.FC<EnergyMonitorProps> = ({ percentage,size }) => {
 
       {/* Texto de porcentaje */}
       <text x={size / 2} y={size / 2} textAnchor="middle" dy="5" fontSize="16" fill="#4FD1C5">
-        {`${percentage}%`}
+        {`${batteryStatus[0]}%`}
       </text>
     </svg>
     </div>
