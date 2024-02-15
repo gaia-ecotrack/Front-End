@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { NavLink } from "react-router-dom";
-import { MdExpandLess, MdExpandMore } from "react-icons/md";
+// import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import { useTypewriter, Cursor } from "react-simple-typewriter";
 
 // import Update from "../../assets/Update.svg";
@@ -9,6 +9,10 @@ import { useTypewriter, Cursor } from "react-simple-typewriter";
 import arrow from "../../assets/arrow.png";
 
 import { ApiLoader } from "../../components/loaders/api-loader/ApiLoader";
+import { IoIosAddCircle } from "react-icons/io";
+import { getAuth } from "firebase/auth";
+
+
 
 // Definición de la interfaz Dispositivo
 interface Dispositivo {
@@ -33,28 +37,63 @@ const PanelUsuarioFinal = () => {
   const [selectedDevice, setSelectedDevice] = useState<Dispositivo | null>(
     null
   );
+  const [name, setName] = useState('');
+
+  useEffect(() => {
+    // Obtener el valor almacenado en localStorage cuando el componente se monta
+    const datoAlmacenado = window.localStorage.getItem('name');
+
+    // Establecer el estado con el valor de localStorage, si existe
+    if (datoAlmacenado) {
+      setName(datoAlmacenado);
+    }
+  }, []); // El segundo parámetro [] asegura que useEffect solo se ejecute una vez al montar el componente
+
 
   const [typeEffect] = useTypewriter({
-    words: ["Hello, Gaia Ecotrack!", "Here you can check out your conections!⚙️"],
+    words: [`Hello, ${name}!, Here you can check out your conections!⚙️`],
     loop: {},
     typeSpeed: 100,
     deleteSpeed: 40,
   });
 
   useEffect(() => {
-    const fetchByAxios = async () => {
+    const fetchDevices = async () => {
+      setIsLoading(true);
       try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) {
+          throw new Error('User is not authenticated');
+        }
+        const idToken = await user.getIdToken();
+  
         const apiUrl = import.meta.env.VITE_APP_API_URL;
-        const response = await axios.get(
-          `${apiUrl}/devices/plant-devices?plantId=13`
-        );
-        setDevices(response.data.devices);
+        // Cambia esta URL a la variable apiUrl si lo necesitas
+        const url = `${apiUrl}/devices/plant-devices?plantId=13`;
+  
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            "Authorization": `Bearer ${idToken}`,
+            "Content-Type": "application/json"
+          }
+        });
+  
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+  
+        const data = await response.json();
+        setDevices(data.devices);
       } catch (error) {
         console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     };
-
-    fetchByAxios();
+  
+    fetchDevices();
   }, []);
 
   // useEffect(() => {
@@ -119,7 +158,6 @@ const PanelUsuarioFinal = () => {
                 {typeEffect}
               </span>
             </div>
-
             <div className="flex flex-col items-center justify-center mb-6">
               <h1 className="text-2xl md:text-3xl text-gray-800 my-4">
                 Your Devices
@@ -138,7 +176,16 @@ const PanelUsuarioFinal = () => {
                 </button>
               </div>
             </div>
+            <div className="flex items-center justify-start">
+    <NavLink to="/deviceReg" className='flex items-center ml-24'>
+        <span>Add new device</span>
+        <button className="ml-4">
+            <IoIosAddCircle className="w-8 h-8" />
+        </button>
+    </NavLink>
+</div>
 
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 m-20">
   {devices.map((device, index) => (
     <div

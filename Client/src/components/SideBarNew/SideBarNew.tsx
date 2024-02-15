@@ -14,17 +14,18 @@ function SideBarNew(props: IHomePageProps): JSX.Element {
     localStorage.removeItem("name");
     localStorage.removeItem("email");
     localStorage.removeItem("profilePic");
+    localStorage.removeItem('id');
+    localStorage.removeItem('completeCredent');
+    localStorage.removeItem('verified');
   };
 
   const [open, setOpen] = useState(false);
   const Menus = [
-    { id: 3, title: "Graphics ", src: "Chart", to: "/Home" },
-    { id: 4, title: "Transactions", src: "User", to: "/dashUser" },
-    { id: 5, title: "Devices", src: "Search", to: "/panelUsuarioFinal" },
-    { id: 6, title: "Network", src: "Chart_fill", to: "/Network" },
-    { id: 7, title: "Info ", src: "Folder", gap: true, to: "/superUser" },
-    { id: 8, title: "Register", src: "Setting", to: "/userReg" },
-    { title: "Notifications", src: "Chat", to: "/notificaciones" },
+    { id: 1, title: "Graphics ", src: "Graphics", to: "/home" },
+    { id: 2, title: "Transactions", src: "Transactions", to: "/dashUser" },
+    { id: 3, title: "Devices", src: "Devices", to: "/panelUsuarioFinal" },
+    { id: 4, title: "Register", src: "Register", to: "/userReg" },
+    { id: 5, title: "Information", src: "Info", gap: true, to: "/superUser" },
   ];
 
   const handleMenuClick = () => {
@@ -70,7 +71,7 @@ function SideBarNew(props: IHomePageProps): JSX.Element {
               : "gap-x-4 items-center"
           }`}
         >
-          <Link to="/settings">
+          <Link to="/userReg">
             <img
               onClick={handleMenuClick}
               src={
@@ -98,16 +99,15 @@ function SideBarNew(props: IHomePageProps): JSX.Element {
         </div>
         <ul className={`${!open && "hidden"} pt-6 sm:block`}>
           {Menus.map((Menu) => (
-            <Link to={Menu.to}>
+            <Link to={Menu.to} key={Menu.id}>
               <li
-                key={Menu.id}
                 className={`flex rounded-md p-2 cursor-pointer hover:bg-light-white text-slate-400 hover:text-white text-sm items-center gap-x-4 
-                ${Menu.gap ? "mt-9" : "mt-2"} ${
+                ${Menu.gap ? "mt-2" : "mt-2"} ${
                   Menu.id === 0 && "bg-light-white"
                 } `}
                 onClick={handleMenuClick}
               >
-                <img src={`/${Menu.src}.png`} alt="logotwo" />
+                <img src={`/${Menu.src}.png`} alt="logotwo" className=" w-8"/> 
                 <span
                   className={`${!open && "hidden"} origin-left duration-200`}
                 >
@@ -121,8 +121,7 @@ function SideBarNew(props: IHomePageProps): JSX.Element {
 
         <div className={` ${open ? "sm:block" : "hidden sm:block"} mt-5`}>
           {!open && <AccountInfo />}
-        </div>
-
+        </div>  
       </div>
     </div>
   );

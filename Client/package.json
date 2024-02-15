@@ -17,6 +17,7 @@
     "@gear-js/ui": "0.5.19",
     "@gear-js/vara-ui": "0.0.2",
     "@mantine/form": "6.0.15",
+    "@mercadopago/sdk-react": "^0.0.16",
     "@polkadot/api": "10.10.1",
     "@polkadot/extension-dapp": "0.46.5",
     "@polkadot/extension-inject": "0.46.5",
@@ -57,7 +58,8 @@
     "react-simple-typewriter": "^5.0.1",
     "react-transition-group": "4.4.5",
     "redux": "^5.0.1",
-    "sass": "1.62.0"
+    "sass": "1.62.0",
+    "sweetalert2": "^11.10.5"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.2.0",

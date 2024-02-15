@@ -13,6 +13,8 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { DeviceRegister } from '@/components/UserNew/DeviceRegister';
 import { CredentialsReg } from '@/components/UserNew/CredentialsReg';
 import { Notifications } from '@/components/UserNew/Notifications';
+import { PlantsDashboard } from '@/components/DashBoard/PlantsDashboard';
+import AuthRoute from '@/components/AuthRoute';
 
 const routes = [{ path: '/main', Page: Main },
 { path: '/labs', Page: Labs },
@@ -26,13 +28,14 @@ const routes = [{ path: '/main', Page: Main },
 { path: '/deviceReg', Page: DeviceRegister },
 { path: '/credentialsReg', Page: CredentialsReg },
 { path: '/notifications', Page: Notifications },
+{ path: 'dashboard/plants', Page: PlantsDashboard },
 
 ];
 
 function Routing() {
   const getRoutes = () => routes.map(({ path, Page }) => <Route key={path} path={path} element={<Page />} />);
 
-  return <AuthProvider><Routes>{getRoutes()}</Routes></AuthProvider>;
+  return <AuthProvider><AuthRoute><Routes>{getRoutes()}</Routes></AuthRoute></AuthProvider>;
 }
 
 export { Routing };

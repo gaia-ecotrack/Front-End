@@ -16,7 +16,7 @@ import { Pie, Bar, Doughnut } from "react-chartjs-2";
 // React Hooks
 import { useState, useEffect } from "react";
 // React Router
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 // Funciones de formato de fecha
 import { format } from "date-fns";
 // Vara
@@ -39,6 +39,9 @@ import EnergyDeviceList from "@/components/EnergyComponentNew/EnergyDeviceList";
 // import { SideBarNew } from "components/SideBarNew/SideBarNew";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
+import { getTokenFromFirebase, sendTokenToBackend } from "../../TokenFirebaseToBackend"
+import Swal from "sweetalert2";
+import { log } from "console";
 
 ChartJS.register(
   ArcElement,
@@ -105,6 +108,10 @@ const getConfig = (): SomeConfig => {
 };
 
 const GraficoEnergia = () => {
+
+  const [token, setToken] = useState('');
+
+
   // estas dos funciones la movi arriba para usarlas en el scop
   const { accounts, account } = useAccount();
   const addresLocal = account?.address;
@@ -124,13 +131,14 @@ const GraficoEnergia = () => {
   const [totalExcedente, setTotalExcedente] = useState<number>(0);
   const [popupOpen, setPopupOpen] = useState(false);
   const [energy, setEnergy] = useState(null);
+  const [energyBatery , setEnergyBatery] = useState()
   const [barData, setBarData] = useState<ChartData<"bar", number[], string>>({
-    labels: ["", "", "", "", "", "", "", "", "", "", ""],
+    labels: ["", "", "", "", "", "", "", "", ""],
     datasets: [
       {
         type: "bar",
         label: "Energy values",
-        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        data: [0, 0, 0, 0, 0, 0, 0, 0, 0],
         backgroundColor: ["#74C7ED", "#F37B7B", "#699CD0"],
         barThickness: 25,
       },
@@ -142,24 +150,38 @@ const GraficoEnergia = () => {
   useEffect(() => {
     const fetchEnergy = async () => {
       try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        console.log(user);
+        
+
+        if (!user) {
+          throw new Error('User is not authenticated');
+        }
+
+        const idToken = await user.getIdToken();
+        console.log(idToken)
+
         const url = import.meta.env.VITE_APP_API_URL;
         const response = await axios.get(
-          `${url}/devices/pv?deviceId=18&setType=EnergyAndPowerPv&period=Recent`
-          
-          
+          `${url}/devices/battery?deviceId=18&setType=EnergyAndPowerPv&period=Month&Date=2024-02`,
+          {
+            headers: {
+              "Authorization": `Bearer ${idToken}`,
+              "Content-Type": "application/json"
+            }
+          }
         );
         const data = response.data.set;
-        const pvGeneration = data[0].pvGeneration;
-        setTotalGenerado(pvGeneration);
-        console.log(pvGeneration);
-        
+        const energy = data.map(energ => energ.pvGeneration);
+        setEnergyBatery(energy);
       } catch (error) {
-        console.log(error);
+        console.error('Error fetching energy data:', error);
       }
     };
-    fetchEnergy();
-    
 
+    fetchEnergy();
+  
 
     // Simula la actualización en tiempo real de los datos de energía
     const interval = setInterval(() => {
@@ -201,17 +223,18 @@ const GraficoEnergia = () => {
         Math.floor(Math.random() * 15001)
       );
 
-      const newBarData = {
-        ...barData,
-        datasets: [
-          {
-            ...barData.datasets[0],
-            data: newData,
-          },
-        ],
-      };
-
-      setBarData(newBarData);
+      if (energyBatery) {
+        const newBarData = {
+          ...barData,
+          datasets: [
+            {
+              ...barData.datasets[0],
+              data: energyBatery,
+            },
+          ],
+        };
+        setBarData(newBarData);
+      }
 
       localStorage.setItem("totalGenerado", JSON.stringify(totalGenerado));
       localStorage.setItem("totalConsumido", JSON.stringify(totalConsumido));
@@ -223,8 +246,10 @@ const GraficoEnergia = () => {
     return () => {
       clearInterval(intervalId);
     };
-  }, [barData]);
+  }, [energyBatery]);
+  
 
+  
   const currentDate = new Date();
 
   const showDate = format(currentDate, "dd/MM/yyyy HH:mm");
@@ -275,6 +300,27 @@ const GraficoEnergia = () => {
   //   );
   //   setExcedenteCapturado(excedente);
   // };
+
+
+  //* token firabse to backend
+
+  // const [token, setToken] = useState('');
+
+  // useEffect(() => {
+  //   const auth = getAuth();
+  //   const user = auth.currentUser;
+  
+  //   if (user) {
+  //     user.getIdToken().then((idToken) => {
+  //       console.log('Token de Firebase:', idToken); // Esta línea imprime el token en la consola
+  //       // Aquí puedes enviar el token a tu backend si es necesario
+  //       sendTokenToBackend('http://127.0.0.1:5000/your/endpoint', 'GET', idToken);
+  //     }).catch((error) => {
+  //       console.error('Error al obtener el token:', error);
+  //     });
+  //   }
+  // }, []);
+
   // const [token, setToken] = useState('');
   // useEffect(() => {
   //   const auth = getAuth();
@@ -293,28 +339,32 @@ const GraficoEnergia = () => {
   //   }
   // }, []);
 
-  //////////////
+  // //////////////
 
-  const sendTokenToBackend = async (token: string) => {
-    try {
-      const url = "https://tu-backend.com/api/authenticate";
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token }),
-      });
-
-      const data = await response.json();
-      console.log("Respuesta del backend:", data);
-    } catch (error) {
-      console.error("Error al enviar token al backend:", error);
-    }
-  };
+  // const sendTokenToBackend = async (token: string) => {
+  //   try {
+  //     // Asegúrate de reemplazar esta URL con la URL de tu servidor Flask
+  //     const url = "http://127.0.0.1:5000/users";
+  //     const response = await fetch(url, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         // Opcionalmente, puedes enviar el token en un header Authorization
+  //         "Authorization": `Bearer ${token}`,
+  //       },
+  //       // O enviar el token en el cuerpo de la solicitud, según prefieras
+  //       body: JSON.stringify({ token }),
+  //     });
+  
+  //     const data = await response.json();
+  //     console.log("Respuesta del backend:", data);
+  //   } catch (error) {
+  //     console.error("Error al enviar token al backend:", error);
+  //   }
+  // };
   //-------------------------------------------------------------------VARA INTEGRATION
 
-  const alert = useAlert();
+  const alerta = useAlert();
   // const { accounts, account } = useAccount();
   const { api } = useApi();
   // Add your programID
@@ -401,7 +451,7 @@ const GraficoEnergia = () => {
 
       transferExtrinsic
         .signAndSend(
-          account?.address ?? alert.error("No account"),
+          account?.address ?? alerta.error("No account"),
           { signer: injector.signer },
           ({ status }: { status: any }) => {
             if (status.isInBlock) {
@@ -409,20 +459,20 @@ const GraficoEnergia = () => {
               setTotalExcedente(0);
               setTotalGenerado(0);
               setTotalConsumido(0);
-              alert.success(status.asInBlock.toString());
+              alerta.success(status.asInBlock.toString());
             } else {
-              alert.info("In process");
+              alerta.info("In process");
               if (status.type === "Finalized") {
-                alert.success(status.type);
+                alerta.success(status.type);
               }
             }
           }
         )
         .catch((error: any) => {
-          alert.error(error.toString());
+          alerta.error(error.toString());
         });
     } else {
-      alert.error("Account not available to sign");
+      alerta.error("Account not available to sign");
     }
   };
 
@@ -437,6 +487,70 @@ const GraficoEnergia = () => {
       signerTwo();
     }
   };
+
+
+// Validacion de email en DB (alerta de registro)
+  const URL = import.meta.env.VITE_APP_API_URL
+  const [email, setEmail] = useState('');
+  const [foundUserId, setFoundUserId] = useState('');
+
+  useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    // console.log(user?.email);
+    const storedEmail = localStorage.getItem("email") ?? '';
+    if(!storedEmail && user?.email){
+      localStorage.setItem("email", user.email);
+    }
+    setEmail(storedEmail || '');    
+    handleSearch();
+  }, [email]);
+
+  const handleSearch = async () => {
+    try {
+      const response = await axios.get(`${URL}/users/search`, {
+        params: {
+          email: email,
+        },
+      });  
+      if (response.status === 200) {
+        setFoundUserId(response.data._id);
+      } else if (response.status === 404) {
+        setFoundUserId('');
+        console.log('Usuario no encontrado');
+      } else {
+        console.error('Error al buscar usuario:', response.status);
+      }
+    } catch (error) {
+      // console.error('Error de red:');
+    }  
+  };
+
+  localStorage.setItem("id", foundUserId);  
+
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      if (!(localStorage.getItem("id"))) {
+        Swal.fire({
+          title: "Don't forget to complete your registration",         
+          icon: "warning",
+          iconColor: "#3085d6",
+          showCancelButton: true,
+          confirmButtonText: "Go register !",
+          confirmButtonColor: "#1f69b4de",
+          cancelButtonText: "Later",
+          cancelButtonColor: "#b82828cd",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/userReg";             
+          }
+        });
+      }
+    }, 10000);
+    return () => clearTimeout(timerId);
+  }, []);
+  
+
 
   //------------------------------VARA INTEGRATION-----------------------------------------------------------------------
 
@@ -573,7 +687,7 @@ const GraficoEnergia = () => {
           </div>
         </div>
 
-        <div className="lg:absolute lef-[50%] lg:top-[15%] 2xl:top-[20%] lg:left-[76%] 2xl:left-[78%] laptop">
+        <div className="lg:absolute lef-[50%] lg:top-[15%] 2xl:top-[20%] lg:left-[76%] 2xl:left-[78%] laptop mt-12">
           <WeatherNavbar />
           <WeatherPanel />
         </div>
