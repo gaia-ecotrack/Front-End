@@ -1,6 +1,22 @@
-import React from 'react';
+import React ,{useState, useEffect}  from 'react';
+import axios from 'axios'
 
 function DashboardCard07() {
+  const [cryptoPrice, setCryptoPrice] = useState("")
+
+  useEffect(() => {
+    const fetchData = async ()=>{
+      try {
+        const URL = import.meta.env.VITE_APP_API_URL
+        const request = await axios.get(`${URL}/coinbase`)
+        const response = request.data
+        setCryptoPrice(response)
+      } catch (error) {
+        
+      }
+    }
+    fetchData()
+  },[])
   return (
     <div className="col-span-full xl:col-span-8 bg-white dark:bg-slate-800 shadow-lg rounded-sm border border-slate-200 dark:border-slate-700">
       <header className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
@@ -62,10 +78,10 @@ function DashboardCard07() {
                   </div>
                 </td>
                 <td className="p-2">
-                  <div className="text-center text-black">21M</div>
+                  <div className="text-center text-black">{parseFloat(cryptoPrice.btc?.vol).toFixed(1)}M</div>
                 </td>
                 <td className="p-2">
-                  <div className="text-center text-emerald-500">$40,426</div>
+                  <div className="text-center text-emerald-500">${cryptoPrice.btc?.price?.data?.amount}</div>
                 </td>
                 <td className="p-2">
                   <div className="text-center text-black">320M</div>
@@ -83,10 +99,10 @@ function DashboardCard07() {
                   </div>
                 </td>
                 <td className="p-2">
-                  <div className="text-center text-black">120M</div>
+                  <div className="text-center text-black">{parseFloat(cryptoPrice.eth?.vol).toFixed(1)}M</div>
                 </td>
                 <td className="p-2">
-                  <div className="text-center text-emerald-500">$1,444</div>
+                  <div className="text-center text-emerald-500">${cryptoPrice.eth?.price?.data?.amount}</div>
                 </td>
                 <td className="p-2">
                   <div className="text-center text-black">50M</div>
@@ -104,10 +120,10 @@ function DashboardCard07() {
                   </div>
                 </td>
                 <td className="p-2">
-                  <div className="text-center text-black">701,8M</div>
+                  <div className="text-center text-black">{parseFloat(cryptoPrice.dot?.vol).toFixed(1)}M</div>
                 </td>
                 <td className="p-2">
-                  <div className="text-center text-emerald-500">$7,23</div>
+                  <div className="text-center text-emerald-500">${cryptoPrice.dot?.price?.data?.amount}</div>
                 </td>
                 <td className="p-2">
                   <div className="text-center text-black">11M</div>
@@ -125,10 +141,10 @@ function DashboardCard07() {
                   </div>
                 </td>
                 <td className="p-2">
-                  <div className="text-center text-black">841M</div>
+                  <div className="text-center text-black">{parseFloat(cryptoPrice.vara?.vol).toFixed(1)}M</div>
                 </td>
                 <td className="p-2">
-                  <div className="text-center text-emerald-500">$0,064</div>
+                  <div className="text-center text-emerald-500">${cryptoPrice.vara?.price?.data?.amount}</div>
                 </td>
                 <td className="p-2">
                   <div className="text-center text-black">800K</div>

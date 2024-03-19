@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable jsx-a11y/alt-text */
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -121,8 +123,7 @@ function PlantsDashboard() {
                 </svg>
                 <span className="">Plants</span>
               </Link>
-            <a
-              href=""
+            <button
               className="text-sm font-medium text-gray-700 py-2 px-2 hover:bg-[#26254f] hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
             >
               <svg
@@ -139,9 +140,8 @@ function PlantsDashboard() {
                 ></path>
               </svg>
               <span className="">Reports</span>
-            </a>  
-            <a
-              href=""
+            </button>  
+            <button
               className="text-sm font-medium text-gray-700 py-2 px-2 hover:bg-[#26254f] hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
             >
               <svg
@@ -158,9 +158,8 @@ function PlantsDashboard() {
                 ></path>
               </svg>
               <span className="">Messages</span>
-            </a>
-            <a
-              href=""
+            </button>
+            <button
               className="text-sm font-medium text-gray-700 py-2 px-2 hover:bg-[#26254f] hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
             >
               <svg
@@ -176,9 +175,9 @@ function PlantsDashboard() {
                 ></path>
               </svg>
               <span className="">Calendar</span>
-            </a>
+            </button>
             <a
-              href=""
+              href="/"
               className="text-sm font-medium text-gray-700 py-2 px-2 hover:bg-[#26254f] hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
             >
               <svg
@@ -196,7 +195,7 @@ function PlantsDashboard() {
               <span className="">Table</span>
             </a>
             <a
-              href=""
+              href="/"
               className="text-sm font-medium text-gray-700 py-2 px-2 hover:bg-[#26254f] hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
             >
               <svg

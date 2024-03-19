@@ -2,9 +2,15 @@ import React, { useContext, useState, useEffect, ReactNode } from "react"
 import { 
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  sendPasswordResetEmail  } from "firebase/auth";
-import { auth }  from "../firebase";
+  updateProfile,
+  updateEmail,
+  updatePassword,
+  sendPasswordResetEmail,
+  User} from "firebase/auth";
+import { auth, storage }  from "../firebase";
 import 'firebase/auth';
+import 'firebase/storage';
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -36,12 +42,25 @@ export function useAuth() {
     return sendPasswordResetEmail(auth, email);    
   }
 
-  function updateEmail(email: string) {
-    return currentUser.updateEmail(email)
+  function updEmail(user: User, email: string) {
+    return updateEmail(user, email);
   }
 
-  function updatePassword(password: string) {
-    return currentUser.updatePassword(password)
+  function updPassword(user: User, password: string) {
+    return updatePassword(user, password)
+  }
+
+  async function upload(file: File, setLoading: (loading: boolean) => void) {
+    const fileRef = ref(storage, currentUser.uid + '.png');
+
+    setLoading(true);
+
+    const snapshot = await uploadBytes(fileRef, file);
+    const photoURL = await getDownloadURL(fileRef);
+
+    updateProfile(currentUser, {photoURL});
+    
+    setLoading(false);   
   }
 
   useEffect(() => {
@@ -59,8 +78,9 @@ export function useAuth() {
     signup,
     logout,
     resetPassword,
-    updateEmail,
-    updatePassword
+    updEmail,
+    updPassword,
+    upload
   }
 
   return (

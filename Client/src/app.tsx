@@ -13,13 +13,18 @@ import DashBoard from "./components/DashBoard/DashBoard";
 import { SuperUser } from './pages/superUser/SuperUser';
 import { Labs } from './pages/Labs/Labs';
 import PanelUsuarioFinal from './pages/panelUsuarioFinal/PanelUsuarioFinal';
-import { UserRegister } from './components/UserNew/UserRegister';
+import { UserRegister } from './components/UserNew/UserAcount/UserRegister';
 import { initializeApp } from 'firebase/app';
 import { config } from "./components/config/config"
 import { Footer } from './pages/Footer/Footer';
 import Logo from "./pages/Logo/Logo";
 import TermsAndPolicy from "./pages/terms&policies/Terms&policy";
 import Face from "./components/Face/Face";
+import PaymentModalMp from "./components/PaymentConfirmedModal/PaymentModalMp";
+import { AuthProvider } from '@/contexts/AuthContext';
+import P2PPage from "./pages/p2p/P2PPage";
+import ChatBot from "./pages/ChatBot/ChatBot";
+
 
 initializeApp(config.firebaseConfig);
 
@@ -40,6 +45,8 @@ function Component() {
         location.pathname !== '/assets/logo' &&
         location.pathname !== '/serviceTerms' &&
         location.pathname !== '/dataPrivacy' &&
+        location.pathname !== '/payment' &&
+        location.pathname !== '/dashAdmin' &&
         location.pathname !== '/' && <SideBar />}    
 
       <main>
@@ -58,16 +65,27 @@ function Component() {
           <Route path="/panelUsuarioFinal" element={<PanelUsuarioFinal />} />
           <Route path="/superUser" element={<SuperUser />} />
           <Route path='/lab' element={<Labs />} />
-          <Route path='/userReg' element={<UserRegister/>} />
+          <Route path='/userReg' element={<AuthProvider><UserRegister/></AuthProvider>} />
           <Route path='/face' element={<Face/>}/>
           <Route path="/dashboard" element={<DashBoard />} />
+          <Route path="/P2PPage" element={<P2PPage />} />
         </Routes>
 
       {shouldShowFooter && 
         location.pathname !== '/assets/logo' &&
         location.pathname !== '/serviceTerms' &&
         location.pathname !== '/dataPrivacy' &&
+        location.pathname !== '/payment' &&
+        location.pathname !== '/dashAdmin' &&
         location.pathname !== '/' && <Footer />} 
+
+      {shouldShowSidebar && 
+        location.pathname !== '/assets/logo' &&
+        location.pathname !== '/serviceTerms' &&
+        location.pathname !== '/dataPrivacy' &&
+        location.pathname !== '/payment' &&
+        location.pathname !== '/dashAdmin' &&
+        location.pathname !== '/' && <ChatBot/>}    
 
     </div>
   );

@@ -1,16 +1,18 @@
 import React , {useState} from 'react'
 import axios from 'axios'
-import { initMercadoPago, Wallet } from '@mercadopago/sdk-react'
+import { initMercadoPago} from '@mercadopago/sdk-react'
 initMercadoPago('TEST-37c724d2-e7c4-43a2-9ae5-93e83eff22fd');
 
 
 
 const MercadoPago = () => {
+  const url = import.meta.env.VITE_APP_API_URL
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [prefrenceId, setPreferenceId] = useState('')
     const createPreference = async () => {
         try {
           const response = await axios.post(
-            `http://127.0.0.1:5000/mercadopago/crearpago`,
+            `${url}/mercadopago/crearpago`,
             {
               "title": "suscripcion",
               "quantity": 1,
@@ -34,7 +36,7 @@ const MercadoPago = () => {
       };
   return (
     <div>
-        <button className='bg-white w-44 flex items-center justify-center h-14 rounded-full ' onClick={handleBuy}>
+        <button className='bg-white border border-black w-44 flex items-center justify-center h-14 rounded-full ' onClick={handleBuy}>
           <img src="/mercadopago.svg" className='w-32' alt="" />
         </button>
 

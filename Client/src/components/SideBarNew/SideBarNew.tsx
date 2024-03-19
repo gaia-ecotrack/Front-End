@@ -1,22 +1,28 @@
 import { CgMenu } from "react-icons/cg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAuth, signOut } from "firebase/auth";
 import { AccountInfo } from "../layout/header/account-info";
-
+import axios from "axios";
 /* eslint-disable */
 export interface IHomePageProps {}
 
 function SideBarNew(props: IHomePageProps): JSX.Element {
+
+  const URL = import.meta.env.VITE_APP_API_URL
   const auth = getAuth();
+
+
+
   const signOutWithoutAuth = async () => {
     await signOut(auth);
+    // localStorage.clear()
     localStorage.removeItem("name");
     localStorage.removeItem("email");
     localStorage.removeItem("profilePic");
     localStorage.removeItem('id');
     localStorage.removeItem('completeCredent');
-    localStorage.removeItem('verified');
+    localStorage.removeItem('pendingDocs');
   };
 
   const [open, setOpen] = useState(false);
@@ -24,13 +30,53 @@ function SideBarNew(props: IHomePageProps): JSX.Element {
     { id: 1, title: "Graphics ", src: "Graphics", to: "/home" },
     { id: 2, title: "Transactions", src: "Transactions", to: "/dashUser" },
     { id: 3, title: "Devices", src: "Devices", to: "/panelUsuarioFinal" },
-    { id: 4, title: "Register", src: "Register", to: "/userReg" },
+    { id: 4, title: "Profile", src: "Profile", to: "/userReg" },
     { id: 5, title: "Information", src: "Info", gap: true, to: "/superUser" },
+    { id: 6, title: "P2P", src: "p2p", to: "/P2PPage" },
   ];
 
   const handleMenuClick = () => {
     setOpen(false);
   };
+  const [photoDB, setPhotoDB] = useState<string | null>(null);
+  const [photoURL, setPhotoURL] = useState('');
+
+  useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;  
+
+    const actualizarFotoDePerfil = async () => {
+      try {
+        const userId = localStorage.getItem('id');
+  
+        // Verificar si hay una imagen en user.photoURL, si no, usar la URL predeterminada
+        const photoURL = user?.photoURL || `https://api.multiavatar.com/c6c7f124c574a60dd2.png?apikey=CRrgM6wP8NoyEx`;
+  
+        setPhotoURL(photoURL);
+  
+        const response = await axios.get(`${URL}/users/${userId}`);
+        const userPhoto = response.data.user.photo_profile;
+  
+        if (!userPhoto || userPhoto !== user?.photoURL) {
+          // Realizar el PUT solo si el valor de photo_profile es null
+          await axios.put(`${URL}/users/${userId}`, {
+            photo_profile: photoURL,
+          });
+        } else {
+          // Almacenar el valor de photo_profile en setPhotoDB si no es null
+          setPhotoDB(userPhoto);
+        }
+      } catch (error) {
+        console.error('Error al actualizar la foto:', error);
+      }
+    };  
+    // Esperar 2 segundos antes de llamar a actualizarFotoDePerfil
+    const timeoutId = setTimeout(() => {
+      actualizarFotoDePerfil();
+    }, 1000);  
+    // Limpiar el timeout si el componente se desmonta antes de que se cumplan los 2 segundos
+    return () => clearTimeout(timeoutId);
+  }, [photoURL]);
 
   return (
     <div className="text-white">
@@ -75,12 +121,11 @@ function SideBarNew(props: IHomePageProps): JSX.Element {
             <img
               onClick={handleMenuClick}
               src={
-                localStorage.getItem("profilePic") ||
-                "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=1160&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                photoURL || photoDB || ''
               }
               alt="Profile"
-              className={`h-10 rounded-full cursor-pointer duration-500 ${
-                open && "rotate-[360deg] h-16"
+              className={`h-10 w-10 rounded-full cursor-pointer duration-500 ${
+                open && "rotate-[360deg] h-16 w-16"
               } ${!open ? "hidden sm:block" : ""}`}
             />
           </Link>
